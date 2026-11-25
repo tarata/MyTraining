@@ -1,2 +1,2 @@
 plugins { id 'com.android.application' }
-android { namespace 'com.mytraining'; compileSdk 35; defaultConfig { applicationId 'com.mytraining'; minSdk 23; targetSdk 32; versionCode 5; versionName '2.2' } }
+android { namespace 'com.mytraining'; compileSdk 35; defaultConfig { applicationId 'com.mytraining'; minSdk 23; targetSdk 32; versionCode 6; versionName '2.3' } }
