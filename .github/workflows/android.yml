@@ -12,7 +12,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - u
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools'
