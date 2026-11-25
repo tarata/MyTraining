@@ -19,9 +19,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Check JavaScript syntax
+        run: |
+          python3 -c "from pathlib import Path; s=Path('app/src/main/assets/index.html').read_text(); Path('/tmp/training.js').write_text(s.split('<script>')[1].split('</script>')[0])"
+          node --check /tmp/training.js
       - run: gradle assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: MyTraining-1.1-APK
+          name: MyTraining-2.0-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
