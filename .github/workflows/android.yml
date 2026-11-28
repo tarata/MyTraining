@@ -1,7 +1,7 @@
 name: Build Android APK
 on:
   push:
-    branches: [main]
+    branches: [main, 'release/ruoss-3.1']
   workflow_dispatch:
 jobs:
   build:
@@ -23,9 +23,16 @@ jobs:
         run: |
           python3 -c "from pathlib import Path; s=Path('app/src/main/assets/index.html').read_text(); Path('/tmp/training.js').write_text(s.split('<script>')[1].split('</script>')[0])"
           node --check /tmp/training.js
-      - run: gradle assembleDebug --no-daemon
+      - name: Verify mobile flows and stress cases
+        run: |
+          npm install --prefix "$RUNNER_TEMP/ruoss-tests" playwright@1.56.1
+          "$RUNNER_TEMP/ruoss-tests/node_modules/.bin/playwright" install --with-deps chromium
+          NODE_PATH="$RUNNER_TEMP/ruoss-tests/node_modules" node tests/mobile.cjs
+      - run: gradle assembleDebug bundleRelease --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: RUOSS-3.0-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: RUOSS-3.1-Android
+          path: |
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error

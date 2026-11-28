@@ -1,7 +1,7 @@
 name: RUOSS iOS
 on:
   push:
-    branches: ['ios/ruoss-3.0']
+    branches: ['ios/ruoss-3.0', 'release/ruoss-3.1']
   workflow_dispatch:
 jobs:
   build:
@@ -21,8 +21,8 @@ jobs:
         run: |
           mkdir -p Payload
           cp -R device-build/Build/Products/Release-iphoneos/RUOSS.app Payload/
-          zip -qr RUOSS-3.0-unsigned.ipa Payload
+          zip -qr RUOSS-3.1-unsigned.ipa Payload
       - uses: actions/upload-artifact@v4
         with:
           name: RUOSS-iPhone-unsigned
-          path: RUOSS-3.0-unsigned.ipa
+          path: RUOSS-3.1-unsigned.ipa
