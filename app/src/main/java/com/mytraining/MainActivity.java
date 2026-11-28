@@ -12,6 +12,7 @@ public class MainActivity extends Activity { WebView web; String pendingText;
    return android.view.WindowInsets.CONSUMED;
   });
  }
+ PushService.createChannel(this);
  setContentView(frame);
  frame.requestApplyInsets();
  if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED){
@@ -19,6 +20,18 @@ public class MainActivity extends Activity { WebView web; String pendingText;
  }
  w.loadUrl("file:///android_asset/index.html");}
  class Bridge {
+ @JavascriptInterface public void copyPushToken() {
+  runOnUiThread(() -> com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+    .addOnCompleteListener(MainActivity.this, result -> {
+      String feedback = "Token non disponibile. Controlla la connessione e riprova.";
+      if (result.isSuccessful() && result.getResult() != null) {
+        android.content.ClipboardManager clipboard = getSystemService(android.content.ClipboardManager.class);
+        clipboard.setPrimaryClip(ClipData.newPlainText("Token FCM RUOSS", result.getResult()));
+        feedback = "Token copiato per il messaggio di prova Firebase.";
+      }
+      android.widget.Toast.makeText(MainActivity.this, feedback, android.widget.Toast.LENGTH_LONG).show();
+    }));
+ }
  @JavascriptInterface public void donate(){runOnUiThread(()->startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse("https://www.paypal.com/paypalme/APPRUOSS"))));}
  @JavascriptInterface public void saveFile(String name,String mime,String data){runOnUiThread(()->{pendingText=data;Intent i=new Intent(Intent.ACTION_CREATE_DOCUMENT).setType(mime).addCategory(Intent.CATEGORY_OPENABLE).putExtra(Intent.EXTRA_TITLE,name);startActivityForResult(i,10);});}
  @JavascriptInterface public void pickFile(){runOnUiThread(()->startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),11));}

@@ -1,2 +1,21 @@
-plugins { id 'com.android.application' }
-android { namespace 'com.mytraining'; compileSdk 36; defaultConfig { applicationId 'com.mytraining'; minSdk 23; targetSdk 36; versionCode 9; versionName '3.2' } }
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
+
+android {
+    namespace 'com.mytraining'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.mytraining'
+        minSdk 23
+        targetSdk 36
+        versionCode 10
+        versionName '3.2.1'
+    }
+}
+
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:34.0.0')
+    implementation 'com.google.firebase:firebase-messaging'
+}

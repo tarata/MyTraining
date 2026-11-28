@@ -1,7 +1,7 @@
-name: RUOSS 3.2 Android
+name: RUOSS 3.2.1 Android con Firebase
 on:
   push:
-    branches: ['release/ruoss-3.2']
+    branches: ['feature/ruoss-3.2.1-firebase']
   workflow_dispatch:
 jobs:
   build:
@@ -38,7 +38,7 @@ jobs:
             app/build/outputs/bundle/release/app-release.aab
       - uses: actions/checkout@v4
         with:
-          ref: 4a88293b4896f9d3f682376e6f88aef14eabcfe2
+          ref: 644355ab2a9c79732762d1c93e31aeed8730af97
           path: baseline
       - name: Build previous app as an upgrade fixture
         working-directory: baseline
@@ -72,7 +72,7 @@ jobs:
           New-Item -ItemType Directory -Force $dir | Out-Null
           $apk = Get-ChildItem build-input -Recurse -Filter *.apk
           $aab = Get-ChildItem build-input -Recurse -Filter *.aab
-          Copy-Item $aab.FullName 'pacchetto/RUOSS-3.2-Play.aab'
+          Copy-Item $aab.FullName 'pacchetto/RUOSS-3.2.1-Play.aab'
           Copy-Item packaging/Prepara-APK.ps1,packaging/Prepara-APK.cmd,packaging/LEGGIMI.txt,packaging/dati-ruoss.py pacchetto
           Copy-Item "$env:ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" $dir
           Copy-Item "$env:ANDROID_HOME/platform-tools/adb.exe","$env:ANDROID_HOME/platform-tools/AdbWinApi.dll","$env:ANDROID_HOME/platform-tools/AdbWinUsbApi.dll" $dir
@@ -83,10 +83,10 @@ jobs:
           Copy-Item $prev.FullName fixtures/originale.apk
           Copy-Item $prev.FullName "$dir/base.apk"
           & ./pacchetto/Prepara-APK.ps1
-          Move-Item pacchetto/RUOSS-3.2.apk fixtures/predecessore.apk
+          Move-Item pacchetto/RUOSS-3.2.1.apk fixtures/predecessore.apk
           Copy-Item -Force $apk.FullName "$dir/base.apk"
           & ./pacchetto/Prepara-APK.ps1
-          Move-Item pacchetto/RUOSS-3.2.apk fixtures/aggiornamento.apk
+          Move-Item pacchetto/RUOSS-3.2.1.apk fixtures/aggiornamento.apk
       - uses: actions/upload-artifact@v4
         with:
           name: emulator-fixtures
@@ -94,7 +94,7 @@ jobs:
           path: fixtures
       - uses: actions/upload-artifact@v4
         with:
-          name: RUOSS-3.2-Android
+          name: RUOSS-3.2.1-Android
           path: pacchetto/
           if-no-files-found: error
   upgrade:

@@ -10,7 +10,7 @@ adb uninstall "$pkg"
 adb install fixtures/predecessore.apk
 python3 packaging/dati-ruoss.py ripristina "$RUNNER_TEMP/ruoss.tar"
 adb install -r fixtures/aggiornamento.apk
-adb shell dumpsys package "$pkg" | grep 'versionCode=9'
+adb shell dumpsys package "$pkg" | grep 'versionCode=10'
 python3 packaging/dati-ruoss.py backup "$RUNNER_TEMP/check.tar"
 python3 - "$RUNNER_TEMP" <<'PY'
 import sys, tarfile, pathlib

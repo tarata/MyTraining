@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "20956914679",
+    "project_id": "ruoss-1ea0c",
+    "storage_bucket": "ruoss-1ea0c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:20956914679:android:b00d2456175119475c44f2",
+        "android_client_info": {
+          "package_name": "com.mytraining"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT1WjPyEfjL3J2xeyGlbNpFvvVzT52UGM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

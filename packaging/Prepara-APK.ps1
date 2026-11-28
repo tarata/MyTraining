@@ -36,7 +36,7 @@ try {
     if (Test-Path $pin) {
         if ((Get-Content -Raw $pin).Trim() -ne $digest) { throw 'Firma diversa dalla precedente.' }
     } else { Set-Content -Encoding ASCII $pin -Value $digest }
-    $out = Join-Path $root 'RUOSS-3.2.apk'
+    $out = Join-Path $root 'RUOSS-3.2.1.apk'
     Move-Item -Force -LiteralPath $pending -Destination $out
     Write-Host "APK verificato: $out"
     Write-Host "Firma per gli aggiornamenti: $keys"
