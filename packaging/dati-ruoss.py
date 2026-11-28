@@ -32,7 +32,7 @@ def validate(data):
 
 
 def read_device():
-    return adb("exec-out", "run-as", APP, "tar", "-C", BASE, "-cf", "-", "'Local Storage'")
+    return adb("shell", "-T", f"run-as {APP} tar -C {BASE} -cf - '{STORE}'")
 
 
 def main():
@@ -53,12 +53,11 @@ def main():
         return
     data = args.archivio.read_bytes()
     expected = validate(data)
-    existing = adb("shell", "run-as", APP, "sh", "-c",
-                   '''"if test -d 'app_webview/Default/Local Storage'; then ls -A 'app_webview/Default/Local Storage'; fi"''')
+    adb("shell", "-T", f"run-as {APP} mkdir -p '{BASE}/{STORE}'")
+    existing = adb("shell", "-T", f"run-as {APP} ls -A '{BASE}/{STORE}'")
     if existing.strip():
         raise ValueError("Il dispositivo contiene già dati. Ripristina su una nuova installazione prima del primo avvio.")
-    adb("shell", "run-as", APP, "mkdir", "-p", BASE)
-    adb("exec-in", "run-as", APP, "tar", "-C", BASE, "-xf", "-", data=data)
+    adb("shell", "-T", f"run-as {APP} tar -C {BASE} -xf -", data=data)
     if validate(read_device()) != expected:
         raise ValueError("Verifica del ripristino fallita. Conserva il backup.")
     print("Ripristino verificato. Puoi aprire RUOSS.")
