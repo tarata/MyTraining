@@ -1,7 +1,7 @@
 name: Build Android APK
 on:
   push:
-    branches: [main, 'release/ruoss-3.1']
+    branches: ['release/ruoss-3.2']
   workflow_dispatch:
 jobs:
   build:
@@ -29,9 +29,27 @@ jobs:
           "$RUNNER_TEMP/ruoss-tests/node_modules/.bin/playwright" install --with-deps chromium webkit
           NODE_PATH="$RUNNER_TEMP/ruoss-tests/node_modules" node tests/mobile.cjs
       - run: gradle assembleDebug bundleRelease --no-daemon
+      - name: Compare the previous test certificate
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 46129451854
+          name: RUOSS-3.1-Android
+          path: previous
+      - name: Identify upgrade signer and hand off APK for offline signing
+        shell: bash
+        run: |
+          signer="$ANDROID_HOME/build-tools/35.0.0/apksigner"
+          previous=$(find previous -name '*.apk' -print -quit 2>/dev/null || true)
+          if [[ -n "$previous" ]]; then "$signer" verify --print-certs "$previous" | grep 'certificate SHA-256'; fi
+          apk=app/build/outputs/apk/debug/app-debug.apk
+          sha256sum "$apk"
+          base64 -w 1024 "$apk" | sed 's/^/RUOSS_APK /'
+          echo
       - uses: actions/upload-artifact@v4
         with:
-          name: RUOSS-3.1-Android
+          name: RUOSS-3.2-build-input
           path: |
             app/build/outputs/apk/debug/app-debug.apk
             app/build/outputs/bundle/release/app-release.aab

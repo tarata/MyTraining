@@ -13,19 +13,20 @@ final class TrainingController: UIViewController, WKScriptMessageHandler, UIDocu
  var web: WKWebView!
  override func viewDidLoad() {
   super.viewDidLoad()
+  view.backgroundColor = UIColor(red: 0.06, green: 0.10, blue: 0.15, alpha: 1)
   let config = WKWebViewConfiguration()
   config.userContentController.add(self, name: "native")
   web = WKWebView(frame: .zero, configuration: config)
   web.translatesAutoresizingMaskIntoConstraints = false
   view.addSubview(web)
-  NSLayoutConstraint.activate([web.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),web.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),web.leadingAnchor.constraint(equalTo: view.leadingAnchor),web.trailingAnchor.constraint(equalTo: view.trailingAnchor)])
+  NSLayoutConstraint.activate([web.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),web.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),web.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),web.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)])
   if let url = Bundle.main.url(forResource:"index",withExtension:"html") { web.loadFileURL(url, allowingReadAccessTo:url.deletingLastPathComponent()) }
   UNUserNotificationCenter.current().requestAuthorization(options:[.alert,.sound,.badge]) { _,_ in }
  }
  func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
   guard let m = message.body as? [String:Any], let action = m["action"] as? String else { return }
   switch action {
-  case "donate": if let url = URL(string:"https://www.paypal.com/donate/?hosted_button_id=2HFNF4PJNC7DG") { UIApplication.shared.open(url) }
+  case "donate": if let url = URL(string:"https://www.paypal.com/paypalme/APPRUOSS") { UIApplication.shared.open(url) }
   case "cancel": UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers:["rest"])
   case "rest":
    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers:["rest"])

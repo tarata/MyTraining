@@ -32,7 +32,29 @@ const { pathToFileURL } = require('node:url');
    await menu('Schede');await click('Reset');await click('Salva');
    await page.locator('#nav button').first().click();
    assert.equal(await page.getByRole('heading',{name:'Rematore test'}).count(),0);
-   await click('Inizia');await click('Termina');await click('Salva sessione');
+   for(const [width,height] of [[320,568],[393,852],[844,390]]){
+     await page.setViewportSize({width,height});
+     const rect=await page.locator('#toolsMenu summary').boundingBox();
+     assert(rect.height>=48 && rect.width>=48 && rect.x>=0 && rect.x+rect.width<=width);
+     await menu('Storico');
+     await page.locator('#nav button').first().click();
+   }
+   await page.setViewportSize({width:360,height:780});
+   const feedback=await page.evaluate(()=>{
+     let tones=0;
+     const play=playStartTone;
+     playStartTone=()=>{tones++;play()};
+     const button=el('startWorkout');
+     button.click();
+     const timestamp=s.started;
+     for(let i=0;i<200;i++)button.click();
+     return {tones,started:timestamp===s.started && timestamp>0,label:button.textContent,disabled:button.disabled,status:el('status').textContent};
+   });
+   assert.deepEqual(feedback,{tones:1,started:true,label:'In corso',disabled:true,status:'SESSIONE IN CORSO · A'});
+   await page.waitForFunction(()=>el('clock').textContent!=='00:00:00');
+   await page.reload();
+   assert(await page.locator('#startWorkout').isDisabled());
+   await click('Termina');await click('Salva sessione');
    await menu('Storico');
    assert.equal(await page.locator('.historyHead').count(),1);
    for(const label of ['Settimana scorsa','Questo mese','Mese scorso','Questa settimana'])await click(label);
