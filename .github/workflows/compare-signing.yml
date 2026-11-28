@@ -1,0 +1,34 @@
+name: Inspect Android update compatibility
+on:
+  push:
+    branches: ['checks/ruoss-3.2-signing']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 46129451854
+          github-token: ${{ github.token }}
+          name: RUOSS-3.1-Android
+          path: previous
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 46156761771
+          github-token: ${{ github.token }}
+          name: RUOSS-3.2-build-input
+          path: current
+      - name: Inspect certificates and owner public encryption keys
+        run: |
+          for d in previous current; do
+            printf '%s ' "$d"
+            "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs "$(find "$d" -name '*.apk' -print -quit)" | grep 'certificate SHA-256'
+          done
+          curl -fsS https://api.github.com/users/tarata/keys | jq -r '.[] | .key | split(" ")[0]'
+          curl -fsS https://api.github.com/users/tarata/gpg_keys | jq -r '.[] | [.key_id,.can_encrypt_comms] | @tsv'
+          if [ -n "$SIGNER_AVAILABLE" ]; then echo "Configured sideload signing secret"; fi
+        env:
+          SIGNER_AVAILABLE: ${{ secrets.RUOSS_TEST_KEYSTORE_B64 }}
