@@ -1,0 +1,81 @@
+name: Pacchetto Android RUOSS 3.2
+on:
+  push:
+    branches: ['delivery/ruoss-3.2']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 46156761771
+          name: RUOSS-3.2-build-input
+          path: build-input
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 46129451854
+          name: RUOSS-3.1-Android
+          path: previous
+      - name: Package and verify the Windows signing kit
+        shell: powershell
+        run: |
+          $dir = 'pacchetto/strumenti'
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          $apk = Get-ChildItem build-input -Recurse -Filter *.apk
+          $aab = Get-ChildItem build-input -Recurse -Filter *.aab
+          Copy-Item $aab.FullName 'pacchetto/RUOSS-3.2-Play.aab'
+          Copy-Item packaging/Prepara-APK.ps1,packaging/Prepara-APK.cmd,packaging/LEGGIMI.txt,packaging/dati-ruoss.py pacchetto
+          Copy-Item "$env:ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" $dir
+          Copy-Item "$env:ANDROID_HOME/platform-tools/adb.exe","$env:ANDROID_HOME/platform-tools/AdbWinApi.dll","$env:ANDROID_HOME/platform-tools/AdbWinUsbApi.dll" $dir
+          jlink --add-modules java.base,java.logging,java.xml,jdk.crypto.ec,jdk.crypto.cryptoki,jdk.crypto.mscapi,jdk.localedata --no-header-files --no-man-pages --strip-debug --compress=2 --output "$dir/java"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory fixtures | Out-Null
+          $prev = Get-ChildItem previous -Recurse -Filter *.apk
+          Copy-Item $prev.FullName fixtures/originale.apk
+          Copy-Item $prev.FullName "$dir/base.apk"
+          & ./pacchetto/Prepara-APK.ps1
+          Move-Item pacchetto/RUOSS-3.2.apk fixtures/predecessore.apk
+          Copy-Item -Force $apk.FullName "$dir/base.apk"
+          & ./pacchetto/Prepara-APK.ps1
+          Move-Item pacchetto/RUOSS-3.2.apk fixtures/aggiornamento.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: emulator-fixtures
+          retention-days: 1
+          path: fixtures
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RUOSS-3.2-Android
+          path: pacchetto/
+          if-no-files-found: error
+  upgrade:
+    needs: windows
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: emulator-fixtures
+          path: fixtures
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          script: bash packaging/verify-upgrade.sh
