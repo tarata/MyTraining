@@ -15,3 +15,14 @@ jobs:
         with:
           name: RUOSS-iOS-simulator
           path: build/Build/Products/Release-iphonesimulator/RUOSS.app
+      - name: Build unsigned iPhone application
+        run: xcodebuild -project ios/RUOSS.xcodeproj -scheme RUOSS -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath device-build CODE_SIGNING_ALLOWED=NO build
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -R device-build/Build/Products/Release-iphoneos/RUOSS.app Payload/
+          zip -qr RUOSS-3.0-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RUOSS-iPhone-unsigned
+          path: RUOSS-3.0-unsigned.ipa
