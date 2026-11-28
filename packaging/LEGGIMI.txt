@@ -1,0 +1,18 @@
+RUOSS 3.2 Android — Windows 64 bit
+
+Estrai tutto lo ZIP in una cartella. Fai doppio clic su Prepara-APK.cmd. Troverai RUOSS-3.2.apk accanto al comando. Java e gli strumenti Android necessari sono inclusi. RUOSS-3.2-Play.aab è il bundle release da firmare con la tua chiave di caricamento per Google Play.
+
+Aggiornamenti degli APK di test
+La prima esecuzione crea una chiave di test in %LOCALAPPDATA%\RUOSS\FirmaTest. Usa lo stesso account Windows e conserva la cartella per produrre i prossimi APK. La password è protetta da Windows per questo utente. Il file certificato.sha256 identifica la firma. Prima di cambiare PC esporta il keystore e la sua password in modo sicuro dal PC di origine.
+
+Migrazione dalla 3.1 APK di test
+Prima di sostituire la vecchia installazione, collega il telefono via USB con debug USB abilitato e computer autorizzato. Serve Python 3 per il backup. Apri PowerShell nella cartella estratta ed esegui:
+
+$env:Path = "$PWD\strumenti;" + $env:Path
+python dati-ruoss.py backup RUOSS-prima-del-cambio.tar
+
+Attendi "Backup verificato". Conserva il file in un luogo privato. Se il backup fallisce, conserva l'installazione precedente. Se è necessario sostituirla, installa il nuovo APK e, prima del primo avvio, esegui:
+
+python dati-ruoss.py ripristina RUOSS-prima-del-cambio.tar
+
+Attendi "Ripristino verificato", poi apri RUOSS. Il comando conserva il backup. Lo strumento usa run-as e richiede le versioni APK di test.

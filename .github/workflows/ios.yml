@@ -5,10 +5,16 @@ on:
   workflow_dispatch:
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
-      - run: brew install xcodegen
+      - name: Check App Store SDK
+        run: |
+          xcodebuild -version
+          sdk=$(xcrun --sdk iphoneos --show-sdk-version)
+          echo "iPhoneOS SDK $sdk"
+          test "${sdk%%.*}" -ge 26
+      - run: command -v xcodegen || brew install xcodegen
       - run: cd ios && xcodegen generate
       - run: xcodebuild -project ios/RUOSS.xcodeproj -scheme RUOSS -configuration Release -sdk iphonesimulator -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
       - uses: actions/upload-artifact@v4
