@@ -1,7 +1,18 @@
 package com.mytraining;
 import android.app.*; import android.os.*; import android.content.*; import android.webkit.*; import android.view.WindowManager;
 public class MainActivity extends Activity { WebView web; String pendingText;
- public void onCreate(Bundle b){super.onCreate(b);getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);WebView w=new WebView(this);web=w;w.getSettings().setJavaScriptEnabled(true);w.getSettings().setDomStorageEnabled(true);w.setWebChromeClient(new WebChromeClient());w.addJavascriptInterface(new Bridge(),"Android");setContentView(w);w.loadUrl("file:///android_asset/index.html");}
+ public void onCreate(Bundle b){super.onCreate(b);getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);WebView w=new WebView(this);web=w;w.getSettings().setJavaScriptEnabled(true);w.getSettings().setDomStorageEnabled(true);w.setWebChromeClient(new WebChromeClient());w.addJavascriptInterface(new Bridge(),"Android");if(Build.VERSION.SDK_INT>=35){
+  w.setOnApplyWindowInsetsListener((v,insets)->{
+   android.graphics.Insets bars=insets.getInsets(android.view.WindowInsets.Type.systemBars() | android.view.WindowInsets.Type.displayCutout());
+   v.setPadding(bars.left,bars.top,bars.right,bars.bottom);
+   return insets;
+  });
+ }
+ setContentView(w);
+ if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED){
+  requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS},20);
+ }
+ w.loadUrl("file:///android_asset/index.html");}
  class Bridge {
  @JavascriptInterface public void donate(){runOnUiThread(()->startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse("https://www.paypal.com/donate/?hosted_button_id=2HFNF4PJNC7DG"))));}
  @JavascriptInterface public void saveFile(String name,String mime,String data){runOnUiThread(()->{pendingText=data;Intent i=new Intent(Intent.ACTION_CREATE_DOCUMENT).setType(mime).addCategory(Intent.CATEGORY_OPENABLE).putExtra(Intent.EXTRA_TITLE,name);startActivityForResult(i,10);});}

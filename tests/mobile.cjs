@@ -1,12 +1,12 @@
 
-const { chromium } = require('playwright');
+const { chromium, webkit } = require('playwright');
 const { strict: assert } = require('node:assert');
 const { resolve } = require('node:path');
 const { pathToFileURL } = require('node:url');
 (async()=>{
- const browser=await chromium.launch();
- try{
-  for(const path of ['app/src/main/assets/index.html','ios/RUOSS/index.html']){
+ for(const [engine,path] of [[chromium,'app/src/main/assets/index.html'],[webkit,'ios/RUOSS/index.html']]){
+  const browser=await engine.launch();
+  try{
    const page=await browser.newPage({viewport:{width:360,height:780},timezoneId:'Europe/Rome'});
    const errors=[];
    page.on('pageerror',e=>errors.push(e.message));
@@ -52,6 +52,6 @@ const { pathToFileURL } = require('node:url');
    }));
    assert.deepEqual(errors,[]);await page.close();
    console.log(path+' passed: editor, history, CSV, 5000 sessions and 150 exercises');
-  }
- }finally{await browser.close()}
+  }finally{await browser.close()}
+ }
 })().catch(e=>{console.error(e);process.exit(1)});
